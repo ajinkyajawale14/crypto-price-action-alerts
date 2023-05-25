@@ -11,6 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.core.cache import cache
 
 # Create your views here.
 
@@ -60,7 +61,16 @@ def delete_alert(request):
 @login_required
 def fetch_all_alerts(request):
     if request.method == 'GET':
+        
+        # add cache 
+        cache_key = 'alerts_{}'.format(request.user.id)
+
+        cached_response = cache.get(cache_key)
+        if cached_response:
+            return JsonResponse({'alerts': cached_response})
+        
         alerts = Alert.objects.filter(user=request.user)
+
         serializer = AlertSerializer(alerts, many=True)
         # add pagination
         paginator = Paginator(alerts, 10)
