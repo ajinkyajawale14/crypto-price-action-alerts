@@ -1,0 +1,23 @@
+version: '3'
+services:
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+      - cache
+      - broker
+  db:
+    image: postgres
+    environment:
+      - POSTGRES_DB=price_alerts
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  cache:
+    image: redis
+  broker:
+    image: rabbitmq
